@@ -5,15 +5,19 @@ const express = require('express');
 
 const app = express();
 
+app.get('/', (req, res) => {
+  res.send('Call /image with image url query parameter');
+});
+
 app.get('/image', function (req, res) {
-    var parts = url.parse(req.url, true);
-    var imageUrl = encodeURI(parts.query.url);
+    let parts = url.parse(req.url, true);
+    const imageUrl = encodeURI(parts.query.url);
 
     parts = url.parse(imageUrl);
 
-    var filename = parts.pathname.split("/").pop();
+    const filename = parts.pathname.split("/").pop();
 
-    var options = {
+    const options = {
         port: (parts.protocol === "https:" ? 443 : 80),
         host: parts.hostname,
         method: 'GET',
@@ -21,12 +25,12 @@ app.get('/image', function (req, res) {
         accept: '*/*'
     };
 
-    var request = (options.port === 443 ? https.request(options) : http.request(options));
+    const request = (options.port === 443 ? https.request(options) : http.request(options));
 
     request.addListener('response', function (proxyResponse) {
-        var offset = 0;
-        var contentLength = parseInt(proxyResponse.headers["content-length"], 10);
-        var body = new Buffer(contentLength);
+        let offset = 0;
+        const contentLength = parseInt(proxyResponse.headers["content-length"], 10);
+        const body = new Buffer(contentLength);
 
         proxyResponse.setEncoding('binary');
         proxyResponse.addListener('data', function(chunk) {
@@ -44,4 +48,8 @@ app.get('/image', function (req, res) {
     request.end();
 });
 
-app.listen('8000', '0.0.0.0');
+const port = process.env.PORT || '8000';
+
+app.listen(port, '0.0.0.0', () => {
+  console.log('Server is running at ' + port);
+});
